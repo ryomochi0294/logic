@@ -1,11 +1,16 @@
 def main2():
-    all_vars = set(['cheetah','turtle','swamp'])
-    know = set(['eats(cheetah,gazelle)','livesin(gazelle,savanna)',
-                 'livesin(cheetah','savanna'),
-                'predator(X,Y,Z)=eats(X,Y) and livesin(X,Z) and livesin(Y,Z)])
-    rules = set(['predator(X,Y)=eats(X,Y)'])
+    all_vars = set(['cheetah','gazelle','savanna'])
+    know = set(['eats,cheetah,gazelle','livesin,gazelle,savanna',
+                 'livesin,cheetah,savanna'])
+    rules = set(['predator,X=eats,X,$Y'])
+    query = 'predator,cheetah'
+    query2 = 'predator,gazelle'
+    print('Cheetah is predator: {}'.format(check2(all_vars,know,rules,query)))
+    print('Gazelle is predator: {}'.format(check2(all_vars,know,rules,query2))
 
-def check2(all_vars, know, rule):
+
+def check2(all_vars, know, rules, query):
+    
     
 
 def check_rule(all_vars, knowledge_base, rule):
@@ -40,4 +45,4 @@ def main():
                 rules.remove(rule)
 
 if __name__ == '__main__':
-    print(main())
+    main2()
