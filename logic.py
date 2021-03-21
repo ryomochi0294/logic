@@ -1,16 +1,19 @@
 def main2():
-    all_vars = set(['cheetah','gazelle','savanna'])
     know = set(['eats,cheetah,gazelle','livesin,gazelle,savanna',
                  'livesin,cheetah,savanna'])
-    rules = set(['predator,X=eats,X,$Y'])
+    rules = set(['predator,X=eats,X,any:Y'])
     query = 'predator,cheetah'
     query2 = 'predator,gazelle'
     print('Cheetah is predator: {}'.format(check2(all_vars,know,rules,query)))
     print('Gazelle is predator: {}'.format(check2(all_vars,know,rules,query2))
 
 
-def check2(all_vars, know, rules, query):
-    
+def check2(know, rules, query):
+    for rule in rules:
+        if rule.startswith(query.split(',')[0]):
+            prov, cond = rule.split('=')
+            func, rest = cond.split(',', 1)
+            
     
 
 def check_rule(all_vars, knowledge_base, rule):
