@@ -1,4 +1,4 @@
-import itertools
+import itertools, re
 
 
 all_vars = ['cheetah','gazelle','savanna']
@@ -7,7 +7,7 @@ know = ['eats,cheetah,gazelle',
         'eats,cheetah,gazelle',
         'livesin,gazelle,savanna',
         'livesin,cheetah,savanna']    
-rules = ['predator(X)=eats,any.X,gazelle',
+rules = ['predator(X)=eats,any.X,any.Y and lives,any.X,savanna',
              'eatsall,X=eats,any.X,any.y,any.Z']
     
     #qs = gen(all_vars,know,rules[0])
@@ -50,12 +50,13 @@ def convrule(rule):
 # cq = 'eats,'
 
 def compound(rule):
-    s = rule.split(' and ')
-    t = []
-    for sig in s:
-        sigs = s.split(' or ')
-        t += sigs
-    print(t)
+    r = re.split(' and | or ', rule)
+    print(r)
+    for rp in r:
+        rparts = convrule(rp)
+        print(rparts)
+    
+    return
 
 def istrue(vtype, index, maxv, cq):
     if index < maxv:
@@ -99,5 +100,5 @@ def istrue(vtype, index, maxv, cq):
 
 if __name__ == '__main__':
     #print(istrue(['any.X','any.Y'],0,2,'eats'))
-    convrule(rules[0])
+    compound(rules[0])
     #convrule(rules[1])
