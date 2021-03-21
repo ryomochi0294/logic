@@ -2,10 +2,13 @@ import itertools
 
 
 all_vars = ['cheetah','gazelle','savanna']
-know = ['eats,cheetah,gazelle','livesin,gazelle,savanna',
-                 'livesin,cheetah,savanna']    
-rules = ['predator(X)=eats,any.X,any.Y',
-             'eatsall,X=eats,any.X,all.y']
+know = ['eats,cheetah,gazelle',
+        'eats,cheetah,gazelle',
+        'eats,cheetah,gazelle',
+        'livesin,gazelle,savanna',
+        'livesin,cheetah,savanna']    
+rules = ['predator(X)=eats,any.X,gazelle',
+             'eatsall,X=eats,any.X,any.y,any.Z']
     
     #qs = gen(all_vars,know,rules[0])
 
@@ -35,7 +38,10 @@ def convrule(rule):
     func = rest.pop(0)
     ll = len(rest)
     print(rest,0,ll,func)
-    print(any(istrue(rest,0,ll,func)))
+    x = istrue(rest,0,ll,func)
+    print(x)
+    print(any(x))
+
 
 # vtype: ['any.X','any.Y']
 # vvalue: ['cheetah','gazelle']
@@ -43,12 +49,24 @@ def convrule(rule):
 # maxv: 2
 # cq = 'eats,'
 
+def compound(rule):
+    s = rule.split(' and ')
+    t = []
+    for sig in s:
+        sigs = s.split(' or ')
+        t += sigs
+    print(t)
+
 def istrue(vtype, index, maxv, cq):
     if index < maxv:
         if vtype[index].startswith('any.'):
             res = []
             for v in all_vars:
-                res.append(istrue(vtype,index+1,maxv,cq+','+v))
+                ret = istrue(vtype,index+1,maxv,cq+','+v)
+                for r in ret:
+                    if not r in res:
+                        res.append(r)
+                #res.append(istrue(vtype,index+1,maxv,cq+','+v))
             if any(res):
                 return res
             else:
@@ -56,11 +74,23 @@ def istrue(vtype, index, maxv, cq):
         elif vtype[index].startswith('all.'):
             res = []
             for v in all_vars:
-                res.append(istrue(vtype,index+1,maxv,cq+','+v))
+                ret = istrue(vtype,index+1,maxv,cq+','+v)
+                for r in ret:
+                    if not r in res:
+                        res.append(r)
+                #res.append(istrue(vtype,index+1,maxv,cq+','+v))
             if all(res):
                 return res
             else:
                 return []
+        else:
+            res = []
+            #res = [istrue(vtype,index+1,maxv,cq+','+vtype[index])]
+            ret = istrue(vtype,index+1,maxv,cq+','+vtype[index])
+            for r in ret:
+                if not r in res:
+                    res.append(ret)
+            return res
     elif index == maxv:
         if cq in know:
             return cq
@@ -70,4 +100,4 @@ def istrue(vtype, index, maxv, cq):
 if __name__ == '__main__':
     #print(istrue(['any.X','any.Y'],0,2,'eats'))
     convrule(rules[0])
-    convrule(rules[1])
+    #convrule(rules[1])
