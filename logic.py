@@ -1,9 +1,12 @@
 def main2():
     all_vars = set(['cheetah','turtle','swamp'])
-    rules = set(['eats(cheetah,gazelle)','livesin(gazelle,savanna)',
+    know = set(['eats(cheetah,gazelle)','livesin(gazelle,savanna)',
                  'livesin(cheetah','savanna'),
                 'predator(X,Y,Z)=eats(X,Y) and livesin(X,Z) and livesin(Y,Z)])
-    evals = set(['predator(X,Y)=eats(X,Y)'])
+    rules = set(['predator(X,Y)=eats(X,Y)'])
+
+def check2(all_vars, know, rule):
+    
 
 def check_rule(all_vars, knowledge_base, rule):
     for var in all_vars:
