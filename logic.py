@@ -1,51 +1,57 @@
+import itertools
+
 def main2():
-    know = set(['eats,cheetah,gazelle','livesin,gazelle,savanna',
-                 'livesin,cheetah,savanna'])
-    rules = set(['predator,X=eats,X,any:Y'])
-    query = 'predator,cheetah'
-    query2 = 'predator,gazelle'
-    print('Cheetah is predator: {}'.format(check2(all_vars,know,rules,query)))
-    print('Gazelle is predator: {}'.format(check2(all_vars,know,rules,query2))
-
-
-def check2(know, rules, query):
-    for rule in rules:
-        if rule.startswith(query.split(',')[0]):
-            prov, cond = rule.split('=')
-            func, rest = cond.split(',', 1)
-            
+    all_vars = ['cheetah','gazelle','savanna']
+    know = ['eats,cheetah,gazelle','livesin,gazelle,savanna',
+                 'livesin,cheetah,savanna']
+    rules = ['predator,X=eats,X,any.Y','eatsall,X=eats,X,all.y']
     
+    #query = 'predator,cheetah'
+    #query2 = 'predator,gazelle'
+    #print('Cheetah is predator: {}'.format(check2(all_vars,know,rules,query)))
+    #print('Gazelle is predator: {}'.format(check2(all_vars,know,rules,query2))
+    #print(eval2(know, 'eats,cheetah,gazelle'))
+    #print(eval2(know, 'eats,gazelle,cheetah'))
+    #print(query_gen(all_vars, know, rules[0]))
+    print(generate(all_vars, know, rules[0]))
 
-def check_rule(all_vars, knowledge_base, rule):
+
+#def check2(know, rules, query):
+    # define functions
+
+
+def generate(all_vars, know, rule):
+    prov, cond = rule.split('=')
+    func, var = prov.split(',', 1)
+
+    conditional_function, rest = cond.split(',', 1)
+    first_var, rest = rest.split(',', 1)
+    rest = rest.split(',')
+
+    all_queries = []
+    # Checking X
     for var in all_vars:
-        exec('%s = %s' % (var, var in knowledge_base))
-    cond, prov = rule.split('->')
-    return eval(cond)
+        query = conditional_function + ',' + var
+        combinations = itertools.combinations(all_vars, len(rest))
+        for combination in combinations:
+            query_test = ','.join([query]+list(combination))
+            all_queries.append(query_test)
+    return all_queries
 
-def main():
-    all_vars = set(['T','B','cat','F'])
-    know = set('T')
-    rules = set(['T or B->cat','cat->F'])
-    checked = set()
-
+def construct(know, rules):
     while True:
         did_change = False
+
         for rule in rules:
-            result = check_rule(all_vars, know, rule)
-            if result == True:
-                cond, prov = rule.split('->')
-                if prov == 'F':
-                    return True
-                know.add(prov)
-                checked.add(rule)
+            results = generate(know, rule)
+            if results != []:
                 did_change = True
 
         if not did_change:
             return False
 
-        for rule in checked:
-            if rule in rules:
-                rules.remove(rule)
+def eval2(know, stmt):
+    return stmt in know
 
 if __name__ == '__main__':
     main2()
