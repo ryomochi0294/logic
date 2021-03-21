@@ -9,29 +9,10 @@ know = ['eats,cheetah,gazelle',
         'livesin,cheetah,savanna']    
 rules = ['predator(X)=eats,any.X,any.Y and lives,any.X,savanna',
              'eatsall,X=eats,any.X,any.y,any.Z']
-    
-    #qs = gen(all_vars,know,rules[0])
-
-"""def gen(all_vars,know,rule):
-    fv,r = rule.split('=')
-    sp = r.split(',')
-    #print(sp)
-    k = sp[0]
-    combos = itertools.combinations_with_replacement(all_vars, len(sp)-1)
-    c = list(combos)
-    #print(c)
-
-    x = [','.join([k]+list(y)) for y in c]
-    y = [z in know for z in x]
-
-    fv,r = rule.split('=')
-    f,v = fv.split(',')
-
-    for k in know:
-        exec('def {}({}):\n\treturn ')"""
 
 
 # istrue(['any.X','any.Y'],0,2,'eats')
+# Convert a string containing a rule into the format used by istrue()
 def convrule(rule):
     fv, rest = rule.split('=')
     rest = rest.split(',')
@@ -60,6 +41,7 @@ def compound(rule):
 
 def istrue(vtype, index, maxv, cq):
     if index < maxv:
+        # If any of the child functions returns true, then return that solution.
         if vtype[index].startswith('any.'):
             res = []
             for v in all_vars:
@@ -72,6 +54,7 @@ def istrue(vtype, index, maxv, cq):
                 return res
             else:
                 return []
+        # Every child function must return a solution or it is false.
         elif vtype[index].startswith('all.'):
             res = []
             for v in all_vars:
@@ -84,6 +67,7 @@ def istrue(vtype, index, maxv, cq):
                 return res
             else:
                 return []
+        # Fixed variable like eats,X.any,gazelle
         else:
             res = []
             #res = [istrue(vtype,index+1,maxv,cq+','+vtype[index])]
@@ -92,6 +76,7 @@ def istrue(vtype, index, maxv, cq):
                 if not r in res:
                     res.append(ret)
             return res
+    # Evaluate when you reach the max depth
     elif index == maxv:
         if cq in know:
             return cq
