@@ -1,23 +1,32 @@
-import itertools, re
+import re
 
-all_vars = ['cheetah','gazelle','savanna','alligator']
-know = ['eats,cheetah,gazelle',
-        'eats,alligator,alligator',
-        'eats,alligator,gazelle',
-        'eats,alligator,savanna',
-        'eats,alligator,cheetah',
-        'eats,alligator,cheetah,gazelle',
+all_vars = ['grass','cheetah','gazelle','savanna','crocodile']
+
+know = [
+    'plant,grass',
+    'animal,gazelle',
+    'animal,cheetah',
+    'animal,crocodile',
+
+    'eats,cheetah,gazelle',
+    'eats,crocodile,gazelle',
+    'eats,crocodile,cheetah',
         
-        'livesin,gazelle,savanna',
-        'livesin,cheetah,savanna']    
-rules = [
-    'predator,X=eats,any.X,any.Y',
-    'eatsall,X=eats,any.X,all.y',
-    'thirdtier,X=eats,any.X,any.Y,any.Z'
+    'livesin,gazelle,savanna',
+    'livesin,cheetah,savanna',
+    'livesin,crocodile,savanna'
 ]
 
+rules = [
+    'herbivore,X=eats,X,Y and plant,Y',
+    'carnivore,X=eats,X,Y and animal,Y',
+    'notpicky,X=eats,X,all.Y and animal,Y',
+    'omnivore,X=eats,X,Y and animal,Y and eats,X,Z and plant,Z',
+    'naturalpredator,X=eats,X,Y and livesin,X,Z and livesin,X,Z',
+    'topofthefoodchain,X=~eats,all.Y,X'
+]
 
-# predator,X=eats,any.X,any.Y
+# predator,X=eats,X,Y and plant,Y
 def evaluate_rule(rule):
     fv, rest = rule.split('=') # fv=predator,X
     rest = rest.split(',')
@@ -51,7 +60,14 @@ def evaluate_phrase(current_query, vtype, index, maxv):
                     res.append(r)
         if vtype[index].startswith('all.') and not all(res):
             return []
-        return res
+        if index > 0:
+            return res
+        else:
+            result = []
+            for r in res:
+                if r != []:
+                    result.append(r)
+            return result
 
     # Evaluate when you reach the max depth
     elif index == maxv:
@@ -71,8 +87,8 @@ def compound(rule):
     return
 
 if __name__ == '__main__':
-    #print(istrue(['any.X','any.Y'],0,2,'eats'))
-    print(evaluate_rule(rules[0]))
-    print(evaluate_rule(rules[1]))
-    print(evaluate_rule(rules[2]))
+    print(evaluate_phrase('livesin', ['X','Y'],0,2))
+    #print(evaluate_rule(rules[0]))
+    #print(evaluate_rule(rules[1]))
+    #print(evaluate_rule(rules[2]))
     #convrule(rules[1])
