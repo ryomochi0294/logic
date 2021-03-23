@@ -1,36 +1,70 @@
 import itertools, re
 
 
-all_vars = ['cheetah','gazelle','savanna']
+all_vars = ['cheetah','gazelle','savanna','alligator']
 know = ['eats,cheetah,gazelle',
-        'eats,cheetah,gazelle',
-        'eats,cheetah,gazelle',
+        'eats,alligator,alligator',
+        'eats,alligator,gazelle',
+        'eats,alligator,savanna',
+        'eats,alligator,cheetah',
+        'eats,alligator,cheetah,gazelle',
+        
         'livesin,gazelle,savanna',
         'livesin,cheetah,savanna']    
-rules = ['predator(X)=eats,any.X,any.Y',
-             'eatsall,X=eats,any.X,any.y,any.Z']
+rules = [
+    'predator,X=eats,any.X,any.Y',
+    'eatsall,X=eats,any.X,all.y',
+    'thirdtier,X=eats,any.X,any.Y,any.Z'
+]
 
 
 # istrue(['any.X','any.Y'],0,2,'eats')
 # Convert a string containing a rule into the format used by istrue()
-def convrule(rule):
+def evaluate_rule(rule):
     fv, rest = rule.split('=')
     rest = rest.split(',')
-    func = rest.pop(0)
-    ll = len(rest)
-    print(rest,0,ll,func)
-    x = istrue(rest,0,ll,func)
 
-    for result in x:
-        print(result)
-        func, var_being_updated = fv.split('(')
-        var_being_updated = var_being_updated.replace(')','')
+    # func = eats
+    func = rest.pop(0)
+
+    new_knowledge = []
+    results = evaluate_phrase(func, rest, 0, len(rest))
+
+    for result in results:
+        if result == []:
+            continue
+        func, var_being_updated = fv.split(',')
         location_in_query = rest.index('any.'+var_being_updated)
-        know = '{},{}'.format(func,result.split(',')[location_in_query+1])
-        print(know)
-    
-    #print(x)
-    #print(any(x))
+        new = '{},{}'.format(func,result.split(',')[location_in_query+1])
+        if not new in new_knowledge:
+            new_knowledge.append(new)
+    return new_knowledge
+
+# eats,any.X,any.Y
+# current_query = 'eats' -> 'eats,cheetah'
+# vtype: ['any.X','any.Y']
+# vvalue: ['cheetah','gazelle']
+# index: 0
+# maxv: 2
+def evaluate_phrase(current_query, vtype, index, maxv):
+    if index < maxv:
+        res = []
+        for v in all_vars:
+            ret = evaluate_phrase(current_query + ',' + v, vtype, index+1, maxv)
+            for r in ret:
+                if not r in res:
+                    res.append(r)
+        if vtype[index].startswith('all.') and not all(res):
+            return []
+        return res
+
+    # Evaluate when you reach the max depth
+    elif index == maxv:
+        if current_query in know:
+            #print(cq)
+            return [current_query]
+        else:
+            return [[]]
 
 def compound(rule):
     r = re.split(' and | or ', rule)
@@ -41,57 +75,9 @@ def compound(rule):
     
     return
 
-# vtype: ['any.X','any.Y']
-# vvalue: ['cheetah','gazelle']
-# index: 1
-# maxv: 2
-# cq = 'eats,'
-def istrue(vtype, index, maxv, cq):
-    if index < maxv:
-        # If any of the child functions returns true, then return that solution.
-        if vtype[index].startswith('any.'):
-            res = []
-            for v in all_vars:
-                ret = istrue(vtype,index+1,maxv,cq+','+v)
-                for r in ret:
-                    if not r in res:
-                        res.append(r)
-                #res.append(istrue(vtype,index+1,maxv,cq+','+v))
-            if any(res):
-                return res
-            else:
-                return []
-        # Every child function must return a solution or it is false.
-        elif vtype[index].startswith('all.'):
-            res = []
-            for v in all_vars:
-                ret = istrue(vtype,index+1,maxv,cq+','+v)
-                for r in ret:
-                    if not r in res:
-                        res.append(r)
-                #res.append(istrue(vtype,index+1,maxv,cq+','+v))
-            if all(res):
-                return res
-            else:
-                return []
-        # Fixed variable like eats,X.any,gazelle
-        else:
-            res = []
-            #res = [istrue(vtype,index+1,maxv,cq+','+vtype[index])]
-            ret = istrue(vtype,index+1,maxv,cq+','+vtype[index])
-            for r in ret:
-                if not r in res:
-                    res.append(ret)
-            return res
-    # Evaluate when you reach the max depth
-    elif index == maxv:
-        if cq in know:
-            #print(cq)
-            return [cq]
-        else:
-            return []
-
 if __name__ == '__main__':
     #print(istrue(['any.X','any.Y'],0,2,'eats'))
-    convrule(rules[0])
+    print(evaluate_rule(rules[0]))
+    print(evaluate_rule(rules[1]))
+    print(evaluate_rule(rules[2]))
     #convrule(rules[1])
