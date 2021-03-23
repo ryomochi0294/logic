@@ -7,7 +7,7 @@ know = ['eats,cheetah,gazelle',
         'eats,cheetah,gazelle',
         'livesin,gazelle,savanna',
         'livesin,cheetah,savanna']    
-rules = ['predator(X)=eats,any.X,any.Y and lives,any.X,savanna',
+rules = ['predator(X)=eats,any.X,any.Y',
              'eatsall,X=eats,any.X,any.y,any.Z']
 
 
@@ -23,13 +23,6 @@ def convrule(rule):
     print(x)
     print(any(x))
 
-
-# vtype: ['any.X','any.Y']
-# vvalue: ['cheetah','gazelle']
-# index: 1
-# maxv: 2
-# cq = 'eats,'
-
 def compound(rule):
     r = re.split(' and | or ', rule)
     print(r)
@@ -39,6 +32,11 @@ def compound(rule):
     
     return
 
+# vtype: ['any.X','any.Y']
+# vvalue: ['cheetah','gazelle']
+# index: 1
+# maxv: 2
+# cq = 'eats,'
 def istrue(vtype, index, maxv, cq):
     if index < maxv:
         # If any of the child functions returns true, then return that solution.
@@ -79,11 +77,12 @@ def istrue(vtype, index, maxv, cq):
     # Evaluate when you reach the max depth
     elif index == maxv:
         if cq in know:
-            return cq
+            #print(cq)
+            return [cq]
         else:
             return []
 
 if __name__ == '__main__':
-    #print(istrue(['any.X','any.Y'],0,2,'eats'))
-    compound(rules[0])
+    print(istrue(['any.X','any.Y'],0,2,'eats'))
+    #convrule(rules[0])
     #convrule(rules[1])
