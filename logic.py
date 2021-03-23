@@ -20,8 +20,17 @@ def convrule(rule):
     ll = len(rest)
     print(rest,0,ll,func)
     x = istrue(rest,0,ll,func)
-    print(x)
-    print(any(x))
+
+    for result in x:
+        print(result)
+        func, var_being_updated = fv.split('(')
+        var_being_updated = var_being_updated.replace(')','')
+        location_in_query = rest.index('any.'+var_being_updated)
+        know = '{},{}'.format(func,result.split(',')[location_in_query+1])
+        print(know)
+    
+    #print(x)
+    #print(any(x))
 
 def compound(rule):
     r = re.split(' and | or ', rule)
@@ -83,6 +92,6 @@ def istrue(vtype, index, maxv, cq):
             return []
 
 if __name__ == '__main__':
-    print(istrue(['any.X','any.Y'],0,2,'eats'))
-    #convrule(rules[0])
+    #print(istrue(['any.X','any.Y'],0,2,'eats'))
+    convrule(rules[0])
     #convrule(rules[1])
