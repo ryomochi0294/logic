@@ -1,6 +1,5 @@
 import itertools, re
 
-
 all_vars = ['cheetah','gazelle','savanna','alligator']
 know = ['eats,cheetah,gazelle',
         'eats,alligator,alligator',
@@ -18,17 +17,13 @@ rules = [
 ]
 
 
-# istrue(['any.X','any.Y'],0,2,'eats')
-# Convert a string containing a rule into the format used by istrue()
+# predator,X=eats,any.X,any.Y
 def evaluate_rule(rule):
-    fv, rest = rule.split('=')
+    fv, rest = rule.split('=') # fv=predator,X
     rest = rest.split(',')
-
-    # func = eats
-    func = rest.pop(0)
-
     new_knowledge = []
-    results = evaluate_phrase(func, rest, 0, len(rest))
+    # evaluate_phrase('eats', ['any.X','any.Y'], 0, 2)
+    results = evaluate_phrase(rest.pop(0), rest, 0, len(rest))
 
     for result in results:
         if result == []:
