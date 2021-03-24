@@ -30,6 +30,7 @@ rules = [
     'carnivore,X=eats,X,Y and animal,Y', # works
     'thirdtier,X=eats,X,Y and eats,Y,Z', # works
     'omnivore,X=eats,X,Y and animal,Y and eats,X,Z and plant,Z', # works
+    'doesnoteat,X=~eats,X,Y',
     'notpicky,X=eats,X,all.Y and animal,Y',
     'naturalpredator,X=eats,X,Y and livesin,X,Z and livesin,X,Z',
     'topofthefoodchain,X=~eats,all.Y,X'
@@ -37,114 +38,34 @@ rules = [
 
 def evaluate_compound_and(compound):
     fv, rest = compound.split('=')
-    phrases = re.split(' and | or ', rest)
-    solns = []
-    all_vars_here = []
+    phrases = rest.split(' and ')
+    vars_ = []
+    for p in phrases:
+        parts = p.split(',')
+        del parts[0]
+        for part in parts:
+            if not part in vars_:
+                vars_.append(part)
+    print(vars_)
 
-    # herbivore,x=eats,X,Y and plant,Y
-    # phrase 1: eats,X,Y, phrase 2: plant,Y
-    for phrase in phrases:
-        # func = eats or plant
-        # variables = X,Y or Y
-        func, variables = phrase.split(',', 1)
-        variables = variables.split(',')
-        for var in variables:
-            if not var in all_vars_here:
-                all_vars_here.append(var.replace('all.',''))
-        # evaluate the phrase
-        nk = evaluate_phrase(func, variables, 0, len(variables))
-        print(nk)
+    combos = itertools.permutations(all_vars, len(vars_))
+    for x in combos:
+        p = rest
+        for y in range(len(x)):
+            p = p.replace(vars_[y], x[y])
+        #print(p)
 
-        solns_phrase = []
-        for n in nk:
-            n = n.split(',', 1)[1]
-            n = n.split(',')
+        p = '\'' + p.replace(' and', '\' in know and') + '\' in know'
+        p = p.replace('and ',' and \'')
+        if eval(p) == True:
+            print(p)
 
-            # if eats,X,Y returns eats,cheetah,gazelle
-            # put it into format:
-            # {
-            #   'X': cheetah,
-            #   'Y': gazelle,
-            #   'phrase': 0
-            # }
-            new_soln = {}
-            for x in range(len(n)):
-                new_soln[variables[x]] = n[x]
-            new_soln['phrase'] = phrase
-            # Append to a list of all solutions for the phrase.
-            solns_phrase.append(new_soln)
-        # Then, append to a list of all solutions.
-        for p in solns_phrase:
-            solns.append(p)
-        #solns.append(solns_phrase)
-
-    #print(solns)    
-    # Now, the task is to find solution(s) to each phrase for which
-    # all variables have the same value.
-    #first = solns[0]
-    #del solns[0]
-
-    fin = resolve_and(all_vars_here, solns, len(phrases))
-    print(fin)
-    print('func=', fv)
-    for solution in fin:
-        new_knowledge = fv
-        for var in solution:
-            new_knowledge = new_knowledge.replace(var, solution[var])
-        if not new_knowledge in know:
-            know.append(new_knowledge)
-            print(new_knowledge)
-
-# Find all combinations of dicts such that there are no variable conflicts and
-# all variables are included.
-def resolve_and(all_vars, solns, total_phrases):
-    # Create a list of all combinations of given solutions.
-    all_combos = []
-    for n in range(1, len(solns)+1):
-        for v in itertools.combinations(solns, n):
-            all_combos.append(v)
-    print(len(all_combos))
-
-    valid = []
-    for possible in all_combos:
-        # Create a dict containing all the values of the variables in a given
-        # combination:
-        # {X: [], Y: []}
-        var_values = {}
-        phrases = []
-        for v in all_vars:
-            var_values[v] = []
-
-        # Add the value for each variable to its list, so:
-        # {X: ['zebra'], Y:['grass']}
-        for soln in possible:
-            for v in soln:
-                if v != 'phrase':
-                    if soln[v] not in var_values[v]:
-                        var_values[v].append(soln[v])
-            if soln['phrase'] not in phrases:
-                phrases.append(soln['phrase'])
-
-        # Each variable should have exactly one value, meaning they are all
-        # the same. Also, the number of unique phrases should equal the total
-        # number of phrases in our equation. So for
-        # herbivore,X=eats,X,Y and plant,Y
-        # We have 2 phrases.
-        # A valid solution must 1 have value for each variable and include
-        # both phrases.
-        max_len_var_vals = max(len(var_values[vt]) for vt in var_values)
-        min_len_var_vals = min(len(var_values[vt]) for vt in var_values)
-        if max_len_var_vals == 1 and min_len_var_vals == 1 and len(phrases) == total_phrases:
-            #print('valid solution', possible)
-
-            soln = {}
-            for x in possible:
-                soln.update(x)
-            del soln['phrase']
-            valid.append(soln)
-        # In this case the solutions are gazelle,grass and zebra,grass.
-    
-    return valid
+            soln = fv
+            for y in range(len(x)):
+                soln = soln.replace(vars_[y], x[y])
+                if not soln in know:
+                    print('adding {}'.format(soln))
+                    know.append(soln)
     
 
 # predator,X=eats,X,Y and plant,Y
@@ -199,8 +120,8 @@ def evaluate_phrase(current_query, vtype, index, maxv):
             return [[]]
 
 if __name__ == '__main__':
-    #evaluate_compound_and(rules[4])
-    print(evaluate_phrase('eats', ['X','all.Y'],0,2))
+    evaluate_compound_and(rules[3])
+    #print(evaluate_phrase('eats', ['X','all.Y'],0,2))
     #print(evaluate_rule(rules[0]))
     #print(evaluate_rule(rules[1]))
     #print(evaluate_rule(rules[2]))
