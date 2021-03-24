@@ -1,6 +1,6 @@
-import re
+import itertools, re
 
-all_vars = ['grass','cheetah','gazelle','savanna','crocodile']
+all_vars = ['grass','cheetah','gazelle','savanna','zebra','crocodile']
 
 know = [
     'plant,grass',
@@ -9,11 +9,15 @@ know = [
     'animal,crocodile',
 
     'eats,gazelle,grass',
+    'eats,zebra,grass',
     'eats,cheetah,gazelle',
+    'eats,cheetah,zebra',
     'eats,crocodile,gazelle',
+    'eats,crocodile,zebra',
     'eats,crocodile,cheetah',
         
     'livesin,gazelle,savanna',
+    'livesin,zebra,savanna',
     'livesin,cheetah,savanna',
     'livesin,crocodile,savanna'
 ]
@@ -55,21 +59,110 @@ def evaluate_compound(compound):
             # put it into format:
             # {
             #   'X': cheetah,
-            #   'Y': gazelle
+            #   'Y': gazelle,
+            #   'phrase': 0
             # }
             new_soln = {}
             for x in range(len(n)):
                 new_soln[variables[x]] = n[x]
+            new_soln['phrase'] = phrase
             # Append to a list of all solutions for the phrase.
             solns_phrase.append(new_soln)
         # Then, append to a list of all solutions.
-        solns.append(solns_phrase)
+        for p in solns_phrase:
+            solns.append(p)
+        #solns.append(solns_phrase)
 
+    #print(solns)    
     # Now, the task is to find solution(s) to each phrase for which
     # all variables have the same value.
     #first = solns[0]
     #del solns[0]
 
+    fin = resolve_and(all_vars_here, solns, len(phrases))
+    print(fin)
+
+# Find all combinations of dicts such that there are no variable conflicts and
+# all variables are included.
+def resolve_and(all_vars, solns, total_phrases):
+    # Create a list of all combinations of given solutions.
+    all_combos = []
+    for n in range(1, len(solns)+1):
+        for v in itertools.combinations(solns, n):
+            all_combos.append(v)
+    print(len(all_combos))
+
+    valid = []
+    for possible in all_combos:
+        var_values = {}
+        phrases = []
+        for v in all_vars:
+            var_values[v] = []
+            #print(v)
+        for soln in possible:
+            for v in soln:
+                if v != 'phrase':
+                    if soln[v] not in var_values[v]:
+                        var_values[v].append(soln[v])
+            if soln['phrase'] not in phrases:
+                phrases.append(soln['phrase'])
+
+        max_len_var_vals = max(len(var_values[vt]) for vt in var_values)
+        if max_len_var_vals == 1 and len(phrases) == total_phrases:
+            print('valid solution', possible)
+
+            soln = {}
+            for x in possible:
+                soln.update(x)
+            del soln['phrase']
+            valid.append(soln)
+            #valid.append(possible)
+            #print(var_values)
+            #print(len(phrases))
+        #return
+    
+    return valid
+
+    """a
+    valid = []
+    for i in range(len(solns) - 1):
+        phrases_had = []
+        possible = solns[i]
+        for j in range(i + 1, len(solns)):
+            compatible = True
+            for key in solns[i]:
+                print(key)
+                if key != 'phrase' and key in solns[j] and solns[i][key] != solns[j][key]:
+                    compatible = False
+            if compatible:
+                possible.update(solns[j])
+        
+
+
+        continue
+        for j in range(i + 1, len(solns)):
+            compatible = True
+            copy1 = possible.copy()
+            for key in solns[j]:
+                if copy1[key] != solns[j][key] and key != 'phrase':
+                    compatible = False
+
+            if compatible:
+                if not solns[j]['phrase'] in phrases_had:
+                    phrases_had.append(solns[j]['phrase'])
+                possible.update(solns[j])
+
+        does_have_all_vars = True
+        for v in all_vars_here:
+            if not v in possible:
+                does_have_all_vars = False
+        if does_have_all_vars:
+            #print('all_vars={}'.format(possible))
+            #print(len(phrases_had))
+            valid.append(possible)
+
+        #if len(phrases_had) == len(phrases) and does_have_all_vars:
+            #valid.append(possible)"""
     
 
 # predator,X=eats,X,Y and plant,Y
