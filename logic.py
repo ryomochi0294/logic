@@ -23,15 +23,16 @@ know = [
 ]
 
 rules = [
-    'herbivore,X=eats,X,Y and plant,Y',
-    'carnivore,X=eats,X,Y and animal,Y',
-    'notpicky,X=eats,X,all.Y and animal,Y',
+    'herbivore,X=eats,X,Y and plant,Y', # works
+    'carnivore,X=eats,X,Y and animal,Y', # works
+    'thirdtier,X=eats,X,Y and eats,Y,Z', # works
     'omnivore,X=eats,X,Y and animal,Y and eats,X,Z and plant,Z',
+    'notpicky,X=eats,X,all.Y and animal,Y',
     'naturalpredator,X=eats,X,Y and livesin,X,Z and livesin,X,Z',
     'topofthefoodchain,X=~eats,all.Y,X'
 ]
 
-def evaluate_compound(compound):
+def evaluate_compound_and(compound):
     fv, rest = compound.split('=')
     phrases = re.split(' and | or ', rest)
     solns = []
@@ -86,9 +87,9 @@ def evaluate_compound(compound):
         new_knowledge = fv
         for var in solution:
             new_knowledge = new_knowledge.replace(var, solution[var])
-        print(new_knowledge)
         if not new_knowledge in know:
             know.append(new_knowledge)
+            print(new_knowledge)
 
 # Find all combinations of dicts such that there are no variable conflicts and
 # all variables are included.
@@ -203,7 +204,7 @@ def compound(rule):
     return
 
 if __name__ == '__main__':
-    evaluate_compound(rules[0])
+    evaluate_compound_and(rules[2])
     #print(evaluate_phrase('eats', ['X','Y'],0,2))
     #print(evaluate_rule(rules[0]))
     #print(evaluate_rule(rules[1]))
