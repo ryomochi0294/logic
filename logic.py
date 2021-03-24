@@ -38,35 +38,30 @@ rules = [
 
 def evaluate_compound_and(compound):
     fv, rest = compound.split('=')
-    phrases = rest.split(' and ')
+    parts = rest.split(' ')
     vars_ = []
-    for p in phrases:
-        parts = p.split(',')
-        del parts[0]
-        for part in parts:
-            if not part in vars_:
-                vars_.append(part)
-    print(vars_)
+    for p in parts:
+        if p != 'or' and p != 'and' and p != 'not':
+            v = p.split(',')
+            del v[0]
+            for var in v:
+                if not var in vars_:
+                    vars_.append(var)
 
     combos = itertools.permutations(all_vars, len(vars_))
     for x in combos:
-        p = rest
-        for y in range(len(x)):
-            p = p.replace(vars_[y], x[y])
-        #print(p)
-
-        p = '\'' + p.replace(' and', '\' in know and') + '\' in know'
-        p = p.replace('and ',' and \'')
-        if eval(p) == True:
-            print(p)
-
-            soln = fv
+        parts2 = parts.copy()
+        for n in range(len(parts2)):
+            if parts2[n] == 'not' or parts2[n] == 'and' or parts2[n] == 'or':
+                continue
             for y in range(len(x)):
-                soln = soln.replace(vars_[y], x[y])
-                if not soln in know:
-                    print('adding {}'.format(soln))
-                    know.append(soln)
-    
+                parts2[n] = parts2[n].replace(vars_[y], x[y])
+            parts2[n] = '"' + parts2[n] + '" in know'
+            
+        #print(parts2)
+        query = ' '.join(parts2)
+        if eval(query) == True:
+            print(query)
 
 # predator,X=eats,X,Y and plant,Y
 def evaluate_rule(rule):
@@ -120,7 +115,7 @@ def evaluate_phrase(current_query, vtype, index, maxv):
             return [[]]
 
 if __name__ == '__main__':
-    evaluate_compound_and(rules[6])
+    evaluate_compound_and(rules[3])
     #print(evaluate_phrase('eats', ['X','all.Y'],0,2))
     #print(evaluate_rule(rules[0]))
     #print(evaluate_rule(rules[1]))
