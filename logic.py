@@ -121,8 +121,8 @@ def resolve_and(all_vars, solns, total_phrases):
         # both phrases.
         max_len_var_vals = max(len(var_values[vt]) for vt in var_values)
         min_len_var_vals = min(len(var_values[vt]) for vt in var_values)
-        if max_len_var_vals == 1 and min_len_var_values == 1 and len(phrases) == total_phrases:
-            print('valid solution', possible)
+        if max_len_var_vals == 1 and min_len_var_vals == 1 and len(phrases) == total_phrases:
+            #print('valid solution', possible)
 
             soln = {}
             for x in possible:
