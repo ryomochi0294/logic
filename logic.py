@@ -18,7 +18,7 @@ know = [
     'eats,crocodile,baboon',
     'eats,crocodile,cheetah',
     'eats,crocodile,crocodile',
-        
+    
     'livesin,gazelle,savanna',
     'livesin,zebra,savanna',
     'livesin,cheetah,savanna',
@@ -30,9 +30,9 @@ rules = [
     'carnivore,X=eats,X,Y and animal,Y', # works
     'thirdtier,X=eats,X,Y and eats,Y,Z', # works
     'omnivore,X=eats,X,Y and animal,Y and eats,X,Z and plant,Z', # works
-    'doesnoteat,X=~eats,X,Y',
+    'doesnoteat,X=not eats,X,Y',
     'notpicky,X=eats,X,all.Y and animal,Y',
-    'naturalpredator,X=eats,X,Y and livesin,X,Z and livesin,X,Z',
+    'naturalpredator,X,Y=eats,X,Y and livesin,X,Z and livesin,Y,Z',
     'topofthefoodchain,X=~eats,all.Y,X'
 ]
 
@@ -120,7 +120,7 @@ def evaluate_phrase(current_query, vtype, index, maxv):
             return [[]]
 
 if __name__ == '__main__':
-    evaluate_compound_and(rules[3])
+    evaluate_compound_and(rules[6])
     #print(evaluate_phrase('eats', ['X','all.Y'],0,2))
     #print(evaluate_rule(rules[0]))
     #print(evaluate_rule(rules[1]))
