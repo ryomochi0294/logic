@@ -1,6 +1,8 @@
 import itertools, re
 
 all_vars = ['grass','cheetah','gazelle','savanna','baboon','crocodile']
+some_vars = ['grass', 'cheetah','gazelle','baboon','crocodile']
+animal_vars = ['cheetah','gazelle','baboon','crocodile']
 
 know = [
     'plant,grass',
@@ -31,9 +33,11 @@ rules = [
     'thirdtier,X=eats,X,Y and eats,Y,Z', # works
     'omnivore,X=eats,X,Y and animal,Y and eats,X,Z and plant,Z', # works
     'doesnoteat,X=not eats,X,Y', # works
-    'notpicky,X=eats,X,all.Y and animal,Y',
+    'notpicky,X=eats,X,all.Y and animal,Y', #works
     'naturalpredator,X,Y=eats,X,Y and livesin,X,Z and livesin,Y,Z', # works
-    'topofthefoodchain,X=~eats,all.Y,X'
+    'topofthefoodchain,X=~eats,all.Y,X', #works
+    'livesin,X=lives,X,Y and place,Y',
+    'specie,X=type,X,Y and type,Y'    
 ]
 
 def evaluate_compound_and(compound):
@@ -52,24 +56,21 @@ def evaluate_compound_and(compound):
     qc = []
     true_for = []
     combos = itertools.product(all_vars, repeat=len(vars_))
-    # Try every combo of variables
-    # eats,gazelle,gazelle
-    # eats,gazelle,grass
-    # ...
+    if compound == rules[4]:
+        combos = itertools.product(some_vars, repeat=len(vars_))
+    elif compound == rules[5]:
+        combos = itertools.product(animal_vars, repeat=len(vars_))    
+    #print(*combos)
     for x in combos:
         parts2 = parts.copy()
         for n in range(len(parts2)):
             parts2[n] = parts2[n].replace('all.','')
             if parts2[n] == 'not' or parts2[n] == 'and' or parts2[n] == 'or':
                 continue
-            # potn = {'X': 'gazelle', 'Y': 'grass'}
-            # Solution in dictionary form.
             potn = {}
-            # Replace with values to check if query is valid.
             for y in range(len(x)):
                 parts2[n] = parts2[n].replace(vars_[y], x[y])
                 potn[vars_[y].replace('all.','')] = x[y]
-            # "eats,gazelle,grass in know" evaluates to true
             parts2[n] = '"' + parts2[n] + '" in know'
         query = ' '.join(parts2)
         if eval(query) == True:
@@ -78,10 +79,71 @@ def evaluate_compound_and(compound):
                 true_for.append(potn)
                 #print(query)
                 #print(potn)
+    cnt = 0
+    d = 14
+    c = 0
+    dic = {}
+    if compound == rules[8]:
+        while d < 18:
+            a = know[d]
+            a = a.split(',')
+            dic['X'] = a[1]
+            dic['Y'] = a[2]
+            print(dic)
+            d = d + 1
+    if compound == rules[9]:
+        while c < 5:
+            a = know[c]
+            a = a.split(',')
+            dic['X'] = a[0]
+            dic['Y'] = a[1]
+            print(dic)
+            c = c + 1            
+    if compound == rules[5]:
+        for x in true_for:
+            if cnt > 1:
+                print(x)
+            cnt = cnt + 1
+    else:
+        for x in true_for:
+            print(x)
+    return true_for
 
-    # Need to check for all. variables.
-    
-    print(true_for)
+
+def ask_query(query):
+    a, b, query= query.split(' ')
+    query, c = query.split('.')
+    #for input Predator(X)
+    if query == 'Predator(X)':
+        a = evaluate_compound_and(rules[1])
+        print('Where all the X: are Predators and Y: are the Prey')
+    elif query == 'Vegetarian(X)':
+        a = evaluate_compound_and(rules[0])
+        print('Where all the X: are Vegetarian Predators and Y: are their food')
+    elif query == 'ThreeStepFoodChain(X)':    
+        a = evaluate_compound_and(rules[2])
+        print('Where X eats Y, and Y eats Z')      
+    elif query == 'Omnivore(X)':
+        a = evaluate_compound_and(rules[3])
+        print('Where all the X: are Omnivore Predators and Y and Z are their food')
+    elif query == 'Dislike(X)':    
+        a = evaluate_compound_and(rules[4])
+        print('Where X does not eat Y')    
+    elif query == 'AnimalChamp(X)':    
+        a = evaluate_compound_and(rules[5])
+        print('Where X is the Biggest Baddest Hungriest Animal')    
+    elif query == 'NaturalPredator(X)':    
+        a = evaluate_compound_and(rules[6])
+        print('Where X eats Y and lives in Z')
+    elif query == 'TopOfFoodChain(X)':    
+        a = evaluate_compound_and(rules[5])
+        print('Where X is the Predator at the Top of the Food Chain') 
+    elif query == 'Location(X)':    
+        a = evaluate_compound_and(rules[8])
+        print('Where X is the Predator and Y is the location') 
+    elif query == 'Type(X)':    
+        a = evaluate_compound_and(rules[9])
+        print('Where X is Type of creature and Y is the Specie') 
 
 # predator,X=eats,X,Y and plant,Y
 def evaluate_rule(rule):
@@ -134,9 +196,28 @@ def evaluate_phrase(current_query, vtype, index, maxv):
         else:
             return [[]]
 
+        
+
 if __name__ == '__main__':
-    evaluate_compound_and(rules[5])
-    #print(evaluate_phrase('eats', ['X','all.Y'],0,2))
+    #evaluate_compound_and(rules[9])
+    #print(evaluate_phrase('eats', ['X','all.Y'],0,2))    
+    txt = '? :- Predator(X).'
+    txt = '? :- Vegetarian(X).'
+    txt = '? :- Omnivore(X).'
+    txt = '? :- ThreeStepFoodChain(X).'   
+    txt = '? :- Dislike(X).'    
+    txt = '? :- AnimalChamp(X).'      
+    txt = '? :- NaturalPredator(X).'   
+    txt = '? :- TopOfFoodChain(X).'  
+    txt = '? :- Location(X).' 
+    txt = '? :- Type(X).'      
+    
+    #ask_query(txt)
+    
+    x = 1
+    while x == 1:
+        inp = input('Type query: ')
+        ask_query(inp)
     #print(evaluate_rule(rules[0]))
     #print(evaluate_rule(rules[1]))
     #print(evaluate_rule(rules[2]))
