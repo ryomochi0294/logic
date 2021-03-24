@@ -32,7 +32,7 @@ rules = [
 ]
 
 def evaluate_compound(compound):
-    func, rest = compound.split('=')
+    fv, rest = compound.split('=')
     phrases = re.split(' and | or ', rest)
     solns = []
     all_vars_here = []
@@ -81,6 +81,14 @@ def evaluate_compound(compound):
 
     fin = resolve_and(all_vars_here, solns, len(phrases))
     print(fin)
+    print('func=', fv)
+    for solution in fin:
+        new_knowledge = fv
+        for var in solution:
+            new_knowledge = new_knowledge.replace(var, solution[var])
+        print(new_knowledge)
+        if not new_knowledge in know:
+            know.append(new_knowledge)
 
 # Find all combinations of dicts such that there are no variable conflicts and
 # all variables are included.
