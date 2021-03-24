@@ -8,6 +8,7 @@ know = [
     'animal,cheetah',
     'animal,crocodile',
 
+    'eats,gazelle,grass',
     'eats,cheetah,gazelle',
     'eats,crocodile,gazelle',
     'eats,crocodile,cheetah',
@@ -26,6 +27,43 @@ rules = [
     'topofthefoodchain,X=~eats,all.Y,X'
 ]
 
+def evaluate_compound(compound):
+    func, rest = compound.split('=')
+    phrases = re.split(' and | or ', rest)
+    solns = []
+
+    # herbivore,x=eats,X,Y and plant,Y
+    # phrase 1: eats,X,Y, phrase 2: plant,Y
+    for phrase in phrases:
+        # func = eats or plant
+        # variables = X,Y or Y
+        func, variables = phrase.split(',', 1)
+        variables = variables.split(',')
+        # evaluate the phrase
+        nk = evaluate_phrase(func, variables, 0, len(variables))
+
+        solns_phrase = []
+        for n in nk:
+            n = n.split(',', 1)[1]
+            n = n.split(',')
+
+            # if eats,X,Y returns eats,cheetah,gazelle
+            # put it into format:
+            # {
+            #   'X': cheetah,
+            #   'Y': gazelle
+            # }
+            new_soln = {}
+            for x in range(len(n)):
+                new_soln[variables[x]] = n[x]
+            # Append to a list of all solutions for the phrase.
+            solns_phrase.append(new_soln)
+        # Then, append to a list of all solutions.
+        solns.append(solns_phrase)
+
+    # Now, the task is to find solution(s) to the phrase for which
+    # all variables have the same value.
+
 # predator,X=eats,X,Y and plant,Y
 def evaluate_rule(rule):
     fv, rest = rule.split('=') # fv=predator,X
@@ -38,7 +76,7 @@ def evaluate_rule(rule):
         if result == []:
             continue
         func, var_being_updated = fv.split(',')
-        location_in_query = rest.index('any.'+var_being_updated)
+        location_in_query = rest.index(var_being_updated)
         new = '{},{}'.format(func,result.split(',')[location_in_query+1])
         if not new in new_knowledge:
             new_knowledge.append(new)
@@ -87,7 +125,8 @@ def compound(rule):
     return
 
 if __name__ == '__main__':
-    print(evaluate_phrase('livesin', ['X','Y'],0,2))
+    evaluate_compound(rules[0])
+    #print(evaluate_phrase('eats', ['X','Y'],0,2))
     #print(evaluate_rule(rules[0]))
     #print(evaluate_rule(rules[1]))
     #print(evaluate_rule(rules[2]))
