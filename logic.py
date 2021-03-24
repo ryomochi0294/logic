@@ -1,20 +1,23 @@
 import itertools, re
 
-all_vars = ['grass','cheetah','gazelle','savanna','zebra','crocodile']
+all_vars = ['grass','cheetah','gazelle','savanna','baboon','crocodile']
 
 know = [
     'plant,grass',
     'animal,gazelle',
     'animal,cheetah',
     'animal,crocodile',
+    'animal,baboon',
 
     'eats,gazelle,grass',
-    'eats,zebra,grass',
+    'eats,baboon,grass',
+    'eats,baboon,gazelle',
     'eats,cheetah,gazelle',
     'eats,cheetah,zebra',
     'eats,crocodile,gazelle',
-    'eats,crocodile,zebra',
+    'eats,crocodile,baboon',
     'eats,crocodile,cheetah',
+    'eats,crocodile,crocodile',
         
     'livesin,gazelle,savanna',
     'livesin,zebra,savanna',
@@ -26,7 +29,7 @@ rules = [
     'herbivore,X=eats,X,Y and plant,Y', # works
     'carnivore,X=eats,X,Y and animal,Y', # works
     'thirdtier,X=eats,X,Y and eats,Y,Z', # works
-    'omnivore,X=eats,X,Y and animal,Y and eats,X,Z and plant,Z',
+    'omnivore,X=eats,X,Y and animal,Y and eats,X,Z and plant,Z', # works
     'notpicky,X=eats,X,all.Y and animal,Y',
     'naturalpredator,X=eats,X,Y and livesin,X,Z and livesin,X,Z',
     'topofthefoodchain,X=~eats,all.Y,X'
@@ -47,9 +50,10 @@ def evaluate_compound_and(compound):
         variables = variables.split(',')
         for var in variables:
             if not var in all_vars_here:
-                all_vars_here.append(var)
+                all_vars_here.append(var.replace('all.',''))
         # evaluate the phrase
         nk = evaluate_phrase(func, variables, 0, len(variables))
+        print(nk)
 
         solns_phrase = []
         for n in nk:
@@ -194,18 +198,9 @@ def evaluate_phrase(current_query, vtype, index, maxv):
         else:
             return [[]]
 
-def compound(rule):
-    r = re.split(' and | or ', rule)
-    print(r)
-    for rp in r:
-        rparts = convrule(rp)
-        print(rparts)
-    
-    return
-
 if __name__ == '__main__':
-    evaluate_compound_and(rules[2])
-    #print(evaluate_phrase('eats', ['X','Y'],0,2))
+    #evaluate_compound_and(rules[4])
+    print(evaluate_phrase('eats', ['X','all.Y'],0,2))
     #print(evaluate_rule(rules[0]))
     #print(evaluate_rule(rules[1]))
     #print(evaluate_rule(rules[2]))
