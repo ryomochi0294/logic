@@ -32,7 +32,7 @@ rules = [
     'omnivore,X=eats,X,Y and animal,Y and eats,X,Z and plant,Z', # works
     'doesnoteat,X=not eats,X,Y',
     'notpicky,X=eats,X,all.Y and animal,Y',
-    'naturalpredator,X,Y=eats,X,Y and livesin,X,Z and livesin,Y,Z',
+    'naturalpredator,X,Y=eats,X,Y and livesin,X,Z and livesin,Y,Z', # works
     'topofthefoodchain,X=~eats,all.Y,X'
 ]
 
