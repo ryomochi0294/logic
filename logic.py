@@ -31,6 +31,7 @@ def evaluate_compound(compound):
     func, rest = compound.split('=')
     phrases = re.split(' and | or ', rest)
     solns = []
+    all_vars_here = []
 
     # herbivore,x=eats,X,Y and plant,Y
     # phrase 1: eats,X,Y, phrase 2: plant,Y
@@ -39,6 +40,9 @@ def evaluate_compound(compound):
         # variables = X,Y or Y
         func, variables = phrase.split(',', 1)
         variables = variables.split(',')
+        for var in variables:
+            if not var in all_vars_here:
+                all_vars_here.append(var)
         # evaluate the phrase
         nk = evaluate_phrase(func, variables, 0, len(variables))
 
@@ -61,8 +65,12 @@ def evaluate_compound(compound):
         # Then, append to a list of all solutions.
         solns.append(solns_phrase)
 
-    # Now, the task is to find solution(s) to the phrase for which
+    # Now, the task is to find solution(s) to each phrase for which
     # all variables have the same value.
+    #first = solns[0]
+    #del solns[0]
+
+    
 
 # predator,X=eats,X,Y and plant,Y
 def evaluate_rule(rule):
