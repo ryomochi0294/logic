@@ -52,16 +52,24 @@ def evaluate_compound_and(compound):
     qc = []
     true_for = []
     combos = itertools.product(all_vars, repeat=len(vars_))
+    # Try every combo of variables
+    # eats,gazelle,gazelle
+    # eats,gazelle,grass
+    # ...
     for x in combos:
         parts2 = parts.copy()
         for n in range(len(parts2)):
             parts2[n] = parts2[n].replace('all.','')
             if parts2[n] == 'not' or parts2[n] == 'and' or parts2[n] == 'or':
                 continue
+            # potn = {'X': 'gazelle', 'Y': 'grass'}
+            # Solution in dictionary form.
             potn = {}
+            # Replace with values to check if query is valid.
             for y in range(len(x)):
                 parts2[n] = parts2[n].replace(vars_[y], x[y])
                 potn[vars_[y].replace('all.','')] = x[y]
+            # "eats,gazelle,grass in know" evaluates to true
             parts2[n] = '"' + parts2[n] + '" in know'
         query = ' '.join(parts2)
         if eval(query) == True:
@@ -70,7 +78,8 @@ def evaluate_compound_and(compound):
                 true_for.append(potn)
                 #print(query)
                 #print(potn)
-    
+
+    # Need to check for all. variables.
     
     print(true_for)
 
