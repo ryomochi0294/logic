@@ -61,14 +61,15 @@ def evaluate_compound_and(compound):
             potn = {}
             for y in range(len(x)):
                 parts2[n] = parts2[n].replace(vars_[y], x[y])
-                potn[vars_[y]] = x[y]
+                potn[vars_[y].replace('all.','')] = x[y]
             parts2[n] = '"' + parts2[n] + '" in know'
         query = ' '.join(parts2)
         if eval(query) == True:
             if not query in qc:
                 qc.append(query)
                 true_for.append(potn)
-                print(query)
+                #print(query)
+                #print(potn)
     
     
     print(true_for)
