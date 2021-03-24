@@ -94,11 +94,16 @@ def resolve_and(all_vars, solns, total_phrases):
 
     valid = []
     for possible in all_combos:
+        # Create a dict containing all the values of the variables in a given
+        # combination:
+        # {X: [], Y: []}
         var_values = {}
         phrases = []
         for v in all_vars:
             var_values[v] = []
-            #print(v)
+
+        # Add the value for each variable to its list, so:
+        # {X: ['zebra'], Y:['grass']}
         for soln in possible:
             for v in soln:
                 if v != 'phrase':
@@ -107,8 +112,16 @@ def resolve_and(all_vars, solns, total_phrases):
             if soln['phrase'] not in phrases:
                 phrases.append(soln['phrase'])
 
+        # Each variable should have exactly one value, meaning they are all
+        # the same. Also, the number of unique phrases should equal the total
+        # number of phrases in our equation. So for
+        # herbivore,X=eats,X,Y and plant,Y
+        # We have 2 phrases.
+        # A valid solution must 1 have value for each variable and include
+        # both phrases.
         max_len_var_vals = max(len(var_values[vt]) for vt in var_values)
-        if max_len_var_vals == 1 and len(phrases) == total_phrases:
+        min_len_var_vals = min(len(var_values[vt]) for vt in var_values)
+        if max_len_var_vals == 1 and min_len_var_values == 1 and len(phrases) == total_phrases:
             print('valid solution', possible)
 
             soln = {}
@@ -116,53 +129,9 @@ def resolve_and(all_vars, solns, total_phrases):
                 soln.update(x)
             del soln['phrase']
             valid.append(soln)
-            #valid.append(possible)
-            #print(var_values)
-            #print(len(phrases))
-        #return
+        # In this case the solutions are gazelle,grass and zebra,grass.
     
     return valid
-
-    """a
-    valid = []
-    for i in range(len(solns) - 1):
-        phrases_had = []
-        possible = solns[i]
-        for j in range(i + 1, len(solns)):
-            compatible = True
-            for key in solns[i]:
-                print(key)
-                if key != 'phrase' and key in solns[j] and solns[i][key] != solns[j][key]:
-                    compatible = False
-            if compatible:
-                possible.update(solns[j])
-        
-
-
-        continue
-        for j in range(i + 1, len(solns)):
-            compatible = True
-            copy1 = possible.copy()
-            for key in solns[j]:
-                if copy1[key] != solns[j][key] and key != 'phrase':
-                    compatible = False
-
-            if compatible:
-                if not solns[j]['phrase'] in phrases_had:
-                    phrases_had.append(solns[j]['phrase'])
-                possible.update(solns[j])
-
-        does_have_all_vars = True
-        for v in all_vars_here:
-            if not v in possible:
-                does_have_all_vars = False
-        if does_have_all_vars:
-            #print('all_vars={}'.format(possible))
-            #print(len(phrases_had))
-            valid.append(possible)
-
-        #if len(phrases_had) == len(phrases) and does_have_all_vars:
-            #valid.append(possible)"""
     
 
 # predator,X=eats,X,Y and plant,Y
